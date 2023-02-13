@@ -1,0 +1,1 @@
+//GET public & protected resources
