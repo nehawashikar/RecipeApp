@@ -5,5 +5,7 @@ In order to upload their own recipe, users must log in or register using their e
 Once authenticated, users can share their recipes with all other users of the website.
 
 ## Technologies used
-### Frontend: React.js, Typescript
-### Backend: Node.js, Express.js, Sequelize, MySQL
+### Frontend: 
+React.js, Typescript
+### Backend: 
+Node.js, Express.js, Sequelize, MySQL
