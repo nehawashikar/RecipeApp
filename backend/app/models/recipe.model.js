@@ -1,7 +1,7 @@
 //create Sequelize data model
 module.exports = (sequelize, Sequelize) => {
-    //columns in tutorials table 
-    const Tutorial = sequelize.define("tutorial", {
+    //columns in recipes table 
+    const Recipe = sequelize.define("recipe", {
         title: {
             type: Sequelize.STRING
         },
@@ -13,5 +13,5 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     
-    return Tutorial;
+    return Recipe;
 };

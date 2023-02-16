@@ -1,8 +1,9 @@
 import { Component, ChangeEvent } from "react";
 import { RouteComponentProps } from 'react-router-dom';
 
-import TutorialDataService from "../services/tutorial.service";
-import ITutorialData from "../types/tutorial.type";
+import RecipeDataService from "../services/recipe.service";
+import IRecipeData from "../types/recipe.type";
+
 
 interface RouterProps { // type for `match.params`
   id: string; // must be type `string` since value comes from the URL
@@ -11,22 +12,22 @@ interface RouterProps { // type for `match.params`
 type Props = RouteComponentProps<RouterProps>;
 
 type State = {
-  currentTutorial: ITutorialData;
+  currentRecipe: IRecipeData;
   message: string;
 }
 
-export default class Tutorial extends Component<Props, State> {
+export default class Recipe extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.onChangeTitle = this.onChangeTitle.bind(this);
     this.onChangeDescription = this.onChangeDescription.bind(this);
-    this.getTutorial = this.getTutorial.bind(this);
+    this.getRecipe = this.getRecipe.bind(this);
     this.updatePublished = this.updatePublished.bind(this);
-    this.updateTutorial = this.updateTutorial.bind(this);
-    this.deleteTutorial = this.deleteTutorial.bind(this);
+    this.updateRecipe = this.updateRecipe.bind(this);
+    this.deleteRecipe = this.deleteRecipe.bind(this);
 
     this.state = {
-      currentTutorial: {
+      currentRecipe: {
         id: null,
         title: "",
         description: "",
@@ -37,7 +38,7 @@ export default class Tutorial extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getTutorial(this.props.match.params.id);
+    this.getRecipe(this.props.match.params.id);
   }
 
   onChangeTitle(e: ChangeEvent<HTMLInputElement>) {
@@ -45,8 +46,8 @@ export default class Tutorial extends Component<Props, State> {
 
     this.setState(function (prevState) {
       return {
-        currentTutorial: {
-          ...prevState.currentTutorial,
+        currentRecipe: {
+          ...prevState.currentRecipe,
           title: title,
         },
       };
@@ -57,18 +58,17 @@ export default class Tutorial extends Component<Props, State> {
     const description = e.target.value;
 
     this.setState((prevState) => ({
-      currentTutorial: {
-        ...prevState.currentTutorial,
-        description: description,
+      currentRecipe: {
+        ...prevState.currentRecipe
       },
     }));
   }
 
-  getTutorial(id: string) {
-    TutorialDataService.get(id)
+  getRecipe(id: string) {
+    RecipeDataService.get(id)
       .then((response: any) => {
         this.setState({
-          currentTutorial: response.data,
+          currentRecipe: response.data,
         });
         console.log(response.data);
       })
@@ -78,18 +78,18 @@ export default class Tutorial extends Component<Props, State> {
   }
 
   updatePublished(status: boolean) {
-    const data: ITutorialData = {
-      id: this.state.currentTutorial.id,
-      title: this.state.currentTutorial.title,
-      description: this.state.currentTutorial.description,
+    const data: IRecipeData = {
+      id: this.state.currentRecipe.id,
+      title: this.state.currentRecipe.title,
+      description: this.state.currentRecipe.description,
       published: status,
     };
 
-    TutorialDataService.update(data, this.state.currentTutorial.id)
+    RecipeDataService.update(data, this.state.currentRecipe.id)
       .then((response: any) => {
         this.setState((prevState) => ({
-          currentTutorial: {
-            ...prevState.currentTutorial,
+          currentRecipe: {
+            ...prevState.currentRecipe,
             published: status,
           },
           message: "The status was updated successfully!"
@@ -101,10 +101,10 @@ export default class Tutorial extends Component<Props, State> {
       });
   }
 
-  updateTutorial() {
-    TutorialDataService.update(
-      this.state.currentTutorial,
-      this.state.currentTutorial.id
+  updateRecipe() {
+    RecipeDataService.update(
+      this.state.currentRecipe,
+      this.state.currentRecipe.id
     )
       .then((response: any) => {
         console.log(response.data);
@@ -117,11 +117,11 @@ export default class Tutorial extends Component<Props, State> {
       });
   }
 
-  deleteTutorial() {
-    TutorialDataService.delete(this.state.currentTutorial.id)
+  deleteRecipe() {
+    RecipeDataService.delete(this.state.currentRecipe.id)
       .then((response: any) => {
         console.log(response.data);
-        this.props.history.push("/tutorials");
+        this.props.history.push("/recipes");
       })
       .catch((e: Error) => {
         console.log(e);
@@ -129,21 +129,21 @@ export default class Tutorial extends Component<Props, State> {
   }
 
   render() {
-    const { currentTutorial } = this.state;
+    const { currentRecipe} = this.state;
 
     return (
       <div>
-        {currentTutorial ? (
+        {currentRecipe ? (
           <div className="edit-form">
             <h4>Selected Recipe</h4>
             <form>
               <div className="form-group">
-                <label htmlFor="title">Title</label>
+                <label htmlFor="title">Recipe Name</label>
                 <input
                   type="text"
                   className="form-control"
                   id="title"
-                  value={currentTutorial.title}
+                  value={currentRecipe.title}
                   onChange={this.onChangeTitle}
                 />
               </div>
@@ -153,21 +153,21 @@ export default class Tutorial extends Component<Props, State> {
                   type="text"
                   className="form-control"
                   id="description"
-                  value={currentTutorial.description}
+                  value={currentRecipe.description}
                   onChange={this.onChangeDescription}
                 />
               </div>
 
               <div className="form-group">
                 <label>
-                  <strong>Status:</strong>
+                  <strong>Tags: </strong>
                 </label>{" "}
-                {currentTutorial.published ? "Published" : "Pending"}
+                {currentRecipe.published ? "Published" : "Pending"}
               </div>
             </form>
 
             <div className="mt-3">
-                {currentTutorial.published ? (
+                {currentRecipe.published ? (
                     <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => this.updatePublished(false)}
@@ -185,7 +185,7 @@ export default class Tutorial extends Component<Props, State> {
 
                 <button
                     className="btn btn-sm btn-danger me-2"
-                    onClick={this.deleteTutorial}
+                    onClick={this.deleteRecipe}
                 >
                 Delete
                 </button>
@@ -193,7 +193,7 @@ export default class Tutorial extends Component<Props, State> {
                 <button
                 type="submit"
                 className="btn btn-sm btn-success"
-                onClick={this.updateTutorial}
+                onClick={this.updateRecipe}
                 >
                 Update
                 </button>

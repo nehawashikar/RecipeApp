@@ -1,4 +1,4 @@
-export default interface ITutorialData {
+export default interface IRecipeData {
     id?: any | null,
     title: string,
     description: string,

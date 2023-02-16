@@ -1,29 +1,34 @@
 import { Component, ChangeEvent } from "react";
-import TutorialDataService from "../services/tutorial.service";
-import ITutorialData from '../types/tutorial.type';
+import RecipeDataService from "../services/recipe.service";
+import IRecipeData from '../types/recipe.type';
+import UserService from "../services/user.service";
+
 
 type Props = {};
 
-type State = ITutorialData & {
+type State = IRecipeData & {
   submitted: boolean
+  content: string;
 };
 
-export default class AddTutorial extends Component<Props, State> {
+export default class AddRecipe extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.onChangeTitle = this.onChangeTitle.bind(this);
     this.onChangeDescription = this.onChangeDescription.bind(this);
-    this.saveTutorial = this.saveTutorial.bind(this);
-    this.newTutorial = this.newTutorial.bind(this);
+    this.saveRecipe = this.saveRecipe.bind(this);
+    this.newRecipe = this.newRecipe.bind(this);
 
     this.state = {
       id: null,
       title: "",
       description: "",
       published: false,
-      submitted: false
+      submitted: false,
+      content: ""
     };
   }
+
 
   onChangeTitle(e: ChangeEvent<HTMLInputElement>) {
     this.setState({
@@ -37,13 +42,13 @@ export default class AddTutorial extends Component<Props, State> {
     });
   }
 
-  saveTutorial() {
-    const data: ITutorialData = {
+  saveRecipe() {
+    const data: IRecipeData = {
       title: this.state.title,
       description: this.state.description
     };
 
-    TutorialDataService.create(data)
+    RecipeDataService.create(data)
       .then((response: any) => {
         this.setState({
           id: response.data.id,
@@ -59,7 +64,7 @@ export default class AddTutorial extends Component<Props, State> {
       });
   }
 
-  newTutorial() {
+  newRecipe() {
     this.setState({
       id: null,
       title: "",
@@ -69,6 +74,26 @@ export default class AddTutorial extends Component<Props, State> {
     });
   }
   
+  componentDidMount() {
+    UserService.getUserBoard().then(
+      response => {
+        this.setState({
+          content: response.data
+        });
+      },
+      error => {
+        this.setState({
+          content:
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString()
+        });
+      }
+    );
+  }
+
     render() {
       const { submitted, title, description } = this.state;
   
@@ -77,14 +102,14 @@ export default class AddTutorial extends Component<Props, State> {
           {submitted ? (
             <div>
               <h4>You submitted successfully!</h4>
-              <button className="btn btn-success" onClick={this.newTutorial}>
+              <button className="btn btn-success" onClick={this.newRecipe}>
                 Add
               </button>
             </div>
           ) : (
             <div>
               <div className="form-group">
-                <label htmlFor="title">Title</label>
+                <label htmlFor="title">Recipe Name</label>
                 <input
                   type="text"
                   className="form-control"
@@ -109,7 +134,7 @@ export default class AddTutorial extends Component<Props, State> {
                 />
               </div>
   
-              <button onClick={this.saveTutorial} className="btn btn-success mt-2">
+              <button onClick={this.saveRecipe} className="btn btn-success mt-2">
                 Submit
               </button>
             </div>

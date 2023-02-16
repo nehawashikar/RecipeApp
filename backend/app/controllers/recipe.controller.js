@@ -1,7 +1,7 @@
-//tutorial controller: create, findAll, findOne, update, delete, deleteAll, findAllPublished
+//recipe controller: create, findAll, findOne, update, delete, deleteAll, findAllPublished
 
 const db = require("../models");
-const Tutorial = db.tutorials;
+const Recipe = db.recipes;
 const Op = db.Sequelize.Op;
 
 //create and save
@@ -14,23 +14,23 @@ exports.create = (req, res) => {
         return;
     }
 
-    //create a tutorial
-    const tutorial = {
+    //create a recipe
+    const recipe = {
         title: req.body.title,
         description: req.body.description,
         //if req.body.published is false or null, return false
         published: req.body.published ? req.body.published : false
     };
 
-    //save the tutorial
-    Tutorial.create(tutorial)
+    //save the recipe
+    Recipe.create(recipe)
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
                 message:
-                    err.message || "Some error occurred while creating the Tutorial."
+                    err.message || "Some error occurred while creating the Recipe."
             });
         });
 };
@@ -40,14 +40,14 @@ exports.findAll = (req, res) => {
   const title = req.query.title;
   var condition = title ? {title: {[Op.like] : `%${title}%`}} : null;
 
-  Tutorial.findAll({where: condition})
+  Recipe.findAll({where: condition})
     .then(data => {
         res.send(data);
     })
     .catch(err => {
         res.status(500).send({
             message:
-                err.message || "Some error occurred while retrieiving tutorials."
+                err.message || "Some error occurred while retrieiving recipes."
         });
     });
 };
@@ -56,20 +56,20 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.findByPk(id)
+  Recipe.findByPk(id)
     .then(data => {
         if(data) {
             res.send(data);
         }
         else {
             res.status(404).send({
-                message: `Cannot find Tutorial with id=${id}.`
+                message: `Cannot find Recipe with id=${id}.`
             })
         }
     })
     .catch(err => {
         res.status(500).send({
-            message: "Error retrieving Tutorial with id=" + id
+            message: "Error retrieving Recipe with id=" + id
         });
     });
 };
@@ -78,24 +78,24 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.update(req.body, {
+  Recipe.update(req.body, {
     where: {id: id}
   })
     .then(num => {
         if (num == 1) {
             res.send({
-                message: "Tutorial updated successfully."
+                message: "Recipe updated successfully."
             });
         }
         else {
             res.send({
-                message: `Cannot update Tutorial with id=${id}. Tutorial may not be found or requested body is empty.`
+                message: `Cannot update Recipe with id=${id}. Recipe may not be found or requested body is empty.`
             });
         }
     })
     .catch(err => {
         res.status(500).send({
-            message: "Error updated Tutorial with id=" + id
+            message: "Error updated Recipe with id=" + id
         });
     });
 };
@@ -104,55 +104,55 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
     const id = req.params.id;
 
-    Tutorial.destroy({
+    Recipe.destroy({
         where: {id : id}
     })
         .then(num => {
             if(num == 1){
                 res.send({
-                    message: "Tutorial was deleted successfully."
+                    message: "Recipe was deleted successfully."
                 });
             }
             else {
                 res.send({
-                    message: `Cannot delete Tutorial with id=${id}. Maybe Tutorial was not found.`
+                    message: `Cannot delete Recipe with id=${id}. Maybe Recipe was not found.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Could not delete Tutorial with the id=" + id
+                message: "Could not delete Recipe with the id=" + id
             });
         })
 };
 
 //delete all
 exports.deleteAll = (req, res) => {
-  Tutorial.destroy({
+    Recipe.destroy({
     where: {},
     truncate: false
   })
     .then(nums => {
-        res.send({message: `${nums} Tutorials were deleted successfully`});
+        res.send({message: `${nums} Recipes were deleted successfully`});
     })
     .catch(err => {
         res.status(500).send({
             message:
-                err.message || "Some error occurred while deleting all tutorials"
+                err.message || "Some error occurred while deleting all recipe"
         });
     });
 };
 
 //find all published
 exports.findAllPublished = (req, res) => {
-  Tutorial.findAll({where: {published: true} })
+    Recipe.findAll({where: {published: true} })
     .then(data => {
         res.send(data);
     })
     .catch(err => {
         res.status(500).send({
             message:
-                err.message || "Some error occurred while retrieving published Tutorials"
+                err.message || "Some error occurred while retrieving published Recipe"
         });
     });
 };

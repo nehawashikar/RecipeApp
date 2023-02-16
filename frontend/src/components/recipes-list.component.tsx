@@ -1,37 +1,56 @@
 import { Component, ChangeEvent } from "react";
-import TutorialDataService from "../services/tutorial.service";
-import { Link } from "react-router-dom";
-import ITutorialData from '../types/tutorial.type';
+import RecipeDataService from "../services/recipe.service";
+import { Link, RouteComponentProps } from "react-router-dom";
+import IRecipeData from '../types/recipe.type';
+import UserService from "../services/user.service";
+
 
 type Props = {};
 
 type State = {
-  tutorials: Array<ITutorialData>,
-  currentTutorial: ITutorialData | null,
+  recipes: Array<IRecipeData>,
+  currentRecipe: IRecipeData | null,
   currentIndex: number,
-  searchTitle: string
+  searchTitle: string,
+  content: string
 };
 
-export default class TutorialsList extends Component<Props, State>{
+export default class RecipesList extends Component<Props, State>{
   constructor(props: Props) {
     super(props);
     this.onChangeSearchTitle = this.onChangeSearchTitle.bind(this);
-    this.retrieveTutorials = this.retrieveTutorials.bind(this);
+    this.retrieveRecipes = this.retrieveRecipes.bind(this);
     this.refreshList = this.refreshList.bind(this);
-    this.setActiveTutorial = this.setActiveTutorial.bind(this);
-    this.removeAllTutorials = this.removeAllTutorials.bind(this);
+    this.setActiveRecipe = this.setActiveRecipe.bind(this);
+    this.removeAllRecipes = this.removeAllRecipes.bind(this);
     this.searchTitle = this.searchTitle.bind(this);
 
     this.state = {
-      tutorials: [],
-      currentTutorial: null,
+      recipes: [],
+      currentRecipe: null,
       currentIndex: -1,
-      searchTitle: ""
+      searchTitle: "",
+      content: "",
     };
   }
 
   componentDidMount() {
-    this.retrieveTutorials();
+    this.retrieveRecipes();
+    UserService.getPublicContent().then(
+      response => {
+        this.setState({
+          content: response.data
+        });
+      },
+      error => {
+        this.setState({
+          content:
+            (error.response && error.response.data) ||
+            error.message ||
+            error.toString()
+        });
+      }
+    );
   }
 
   onChangeSearchTitle(e: ChangeEvent<HTMLInputElement>) {
@@ -42,11 +61,11 @@ export default class TutorialsList extends Component<Props, State>{
     });
   }
 
-  retrieveTutorials() {
-    TutorialDataService.getAll()
+  retrieveRecipes() {
+    RecipeDataService.getAll()
       .then((response: any) => {
         this.setState({
-          tutorials: response.data
+          recipes: response.data
         });
         console.log(response.data);
       })
@@ -56,22 +75,22 @@ export default class TutorialsList extends Component<Props, State>{
   }
 
   refreshList() {
-    this.retrieveTutorials();
+    this.retrieveRecipes();
     this.setState({
-      currentTutorial: null,
+      currentRecipe: null,
       currentIndex: -1
     });
   }
 
-  setActiveTutorial(tutorial: ITutorialData, index: number) {
+  setActiveRecipe(recipe: IRecipeData, index: number) {
     this.setState({
-      currentTutorial: tutorial,
+      currentRecipe: recipe,
       currentIndex: index
     });
   }
 
-  removeAllTutorials() {
-    TutorialDataService.deleteAll()
+  removeAllRecipes() {
+    RecipeDataService.deleteAll()
       .then((response: any) => {
         console.log(response.data);
         this.refreshList();
@@ -83,14 +102,14 @@ export default class TutorialsList extends Component<Props, State>{
 
   searchTitle() {
     this.setState({
-      currentTutorial: null,
+      currentRecipe: null,
       currentIndex: -1
     });
 
-    TutorialDataService.findByTitle(this.state.searchTitle)
+    RecipeDataService.findByTitle(this.state.searchTitle)
       .then((response: any) => {
         this.setState({
-          tutorials: response.data
+          recipes: response.data
         });
         console.log(response.data);
       })
@@ -100,7 +119,7 @@ export default class TutorialsList extends Component<Props, State>{
   }
 
   render() {
-    const { searchTitle, tutorials, currentTutorial, currentIndex } = this.state;
+    const { searchTitle, recipes, currentRecipe, currentIndex } = this.state;
 
     return (
       <div className="list row">
@@ -125,56 +144,57 @@ export default class TutorialsList extends Component<Props, State>{
           </div>
         </div>
         <div className="col-md-6">
-          <h4>My Recipes</h4>
+          <h4>All Recipes</h4>
 
           <ul className="list-group">
-            {tutorials &&
-              tutorials.map((tutorial: ITutorialData, index: number) => (
+            {recipes &&
+              recipes.map((recipe: IRecipeData, index: number) => (
                 <li
                   className={
                     "list-group-item " +
                     (index === currentIndex ? "active" : "")
                   }
-                  onClick={() => this.setActiveTutorial(tutorial, index)}
+                  onClick={() => this.setActiveRecipe(recipe, index)}
                   key={index}
                 >
-                  {tutorial.title}
+                  {recipe.title}
                 </li>
               ))}
           </ul>
 
           <button
             className="my-3 btn btn-sm btn-danger"
-            onClick={this.removeAllTutorials}
+            onClick={this.removeAllRecipes}
           >
             Remove All
           </button>
         </div>
         <div className="col-md-6">
-          {currentTutorial ? (
+          {currentRecipe ? (
             <div>
               <h4>Selected Recipe</h4>
               <div>
                 <label>
                   <strong>Title:</strong>
                 </label>{" "}
-                {currentTutorial.title}
+                {currentRecipe.title}
               </div>
               <div>
                 <label>
                   <strong>Description:</strong>
                 </label>{" "}
-                {currentTutorial.description}
+                {currentRecipe.description}
               </div>
               <div>
                 <label>
-                  <strong>Status:</strong>
+                  <strong>Tags:</strong>
                 </label>{" "}
-                {currentTutorial.published ? "Published" : "Pending"}
+                {currentRecipe.published ? "Published" : "Pending"}
+
               </div>
 
               <Link
-                to={"/tutorials/" + currentTutorial.id}
+                to={"/recipes/" + currentRecipe.id}
                 className="mt-2 btn btn-sm btn-warning"
               >
                 Edit

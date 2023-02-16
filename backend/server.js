@@ -12,6 +12,9 @@ const cors = require("cors");
 //create an express app
 const app = express();
 
+const RecipeController = require("./app/controllers/recipe.controller");
+
+
 //set the origin
 var corsOptions = {
     origin: "http://localhost:8081"
@@ -28,11 +31,13 @@ app.use(express.urlencoded({extended: true}));
 
 
 const db = require("./app/models");
+const Role = db.role;
 
 //resync databse
-db.sequelize.sync()
+db.sequelize.sync({ force: process.env.NODE_ENV !== "production" })
   .then(() => {
     console.log("Synced db.");
+    initial();
   })
   .catch((err) => {
     console.log("Failed to sync db: " + err.message);
@@ -40,14 +45,35 @@ db.sequelize.sync()
 
 //GET route
 app.get("/", (req, res) => {
-    res.json({message: "Welcome to the book application."});
+    res.json({message: "Welcome to the recipe application."});
 });
 
+//create 3 rows in database
+function initial() {
+  Role.create({
+    id: 1,
+    name: "user"
+  }).catch(() => console.log("Error initializing user role"));
+
+  Role.create({
+    id: 2,
+    name: "moderator"
+  }).catch(() => console.log("Error initializing moderator role"));
+
+  Role.create({
+    id: 3,
+    name: "admin"
+  }).catch(() => console.log("Error initializing admin role"));
+
+}
+
 //include the routes
-require("./app/routes/tutorial.routes")(app);
+require("./app/routes/recipe.routes")(app);
+require('./app/routes/auth.routes')(app);
+require('./app/routes/user.routes')(app);
 
 //listen for requests on port 8080 for incoming requests 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log('Server is running on port ' + PORT);
+  console.log(`Server is running on port ${PORT}.`);
 });
